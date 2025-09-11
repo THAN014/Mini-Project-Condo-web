@@ -3,7 +3,9 @@ include 'ConnectDB.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $Username = $_POST['Username'];
     $Password = $_POST['Password'];
-    $sql = "INSERT INTO users (Username, Password) VALUES ('$Username', '$Password')";
+    $Phone = $_POST['Phone'];
+    $Email = $_POST['Email'];
+    $sql = "INSERT INTO users (Username, Password , Phone , Email) VALUES ('$Username', '$Password' , '$Phone' , '$Email')";
     if ($conn->query($sql)) {
         header("Location: login.php");
         exit;
@@ -107,25 +109,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <form method="post" action="">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="firstName" class="form-label">ชื่อ *</label>
-                            <input type="text" class="form-control" id="firstName" placeholder="กรอกชื่อของคุณ">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="lastName" class="form-label">นามสกุล *</label>
-                            <input type="text" class="form-control" id="lastName" placeholder="กรอกนามสกุลของคุณ">
+                            <label for="firstName" class="form-label">Username *</label>
+                            <input type="text" class="form-control" id="firstName" placeholder="กรอกชื่อของคุณ" name="Username" required>
                         </div>
                         <div class="col-12">
                             <label for="email" class="form-label">อีเมล *</label>
-                            <input type="email" class="form-control" id="email" placeholder="example@email.com">
+                            <input type="email" class="form-control" id="Email" placeholder="example@email.com" name="Email" required>
                         </div>
                         <div class="col-12">
                             <label for="phone" class="form-label">เบอร์โทรศัพท์ *</label>
-                            <input type="tel" class="form-control" id="phone" placeholder="08X-XXX-XXXX">
+                            <input type="tel" class="form-control" id="Phone" placeholder="08X-XXX-XXXX" name="Phone" required>
                         </div>
                         <div class="col-md-6">
                             <label for="password" class="form-label">รหัสผ่าน *</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password" placeholder="อย่างน้อย 8 ตัวอักษร">
+                                <input type="password" class="form-control" id="Password" placeholder="อย่างน้อย 8 ตัวอักษร" name="Password" required>
                                 <span class="input-group-text bg-transparent"><i class="bi bi-eye"></i></span>
                             </div>
                         </div>

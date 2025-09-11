@@ -265,8 +265,8 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                                         ?>
                                     </td>
                                     <td>
-                                        <a href="edit_room.php?id=<?= $row['Room_id']; ?>">✏️ แก้ไข</a> |
-                                        <a href="delete_room.php?id=<?= $row['Room_id']; ?>" onclick="return confirm('ยืนยันลบห้องนี้?');">🗑️ ลบ</a>
+                                        <a href="edit_room.php?Room_id=<?= $row['Room_id']; ?>">✏️ แก้ไข</a> |
+                                        <a href="delete_room.php?Room_id=<?= $row['Room_id']; ?>" onclick="return confirm('ยืนยันลบห้องนี้?');">🗑️ ลบ</a>
                                     </td>
 
                                 </tr>
