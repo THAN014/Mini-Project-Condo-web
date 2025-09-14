@@ -2,6 +2,8 @@
 include 'ConnectDB.php';
 session_start();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="th">
 
@@ -12,9 +14,9 @@ session_start();
   <meta name="description" content="เลือกซื้อขายคอนโดคุณภาพในทำเลที่ดีที่สุดของจังหวัดชลบุรี" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="globals.css" />
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-light">
@@ -33,8 +35,15 @@ session_start();
           <li class="nav-item"><a class="nav-link" href="#contact">ติดต่อ</a></li>
         </ul>
         <div class="d-flex align-items-center">
-          <?php if (isset($_SESSION['User_id'])): ?>
-            <span class="me-2"><a class="nav-link" href="user_reserved.php">ประวัติ</a></span>
+          <?php if (isset($_SESSION['User_id'])):
+            $_SESSION['Role']; ?>
+
+            <?php if ($_SESSION['Role'] === 'Admin'): ?>
+              <span class="me-2"><a class="nav-link" href="manage_room.php">ไปที่ Dashboard</a></span>
+            <?php endif; ?>
+
+            <span class="me-2"><a class="nav-link" href="user_reserved.php">ประวัติการจอง</a></span>
+            <span class="me-2"><a class="nav-link" href="user_purchase.php">ประวัติการซื้อ</a></span>
             <span class="me-2">สวัสดี, <?= htmlspecialchars($_SESSION['Username']); ?></span>
             <a href="logout.php" class="btn btn-outline-secondary btn-sm">ออกจากระบบ</a>
           <?php else: ?>
@@ -154,7 +163,7 @@ session_start();
         <div class="col-md-4">
           <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
-              
+
               <h5 class="card-title">ตรวจสอบคุณภาพ</h5>
               <p class="card-text">เราตรวจสอบคุณภาพของทุกคอนโดก่อนนำเสนอให้ลูกค้า</p>
             </div>
@@ -163,7 +172,7 @@ session_start();
         <div class="col-md-4">
           <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
-              
+
               <h5 class="card-title">บริการครบครัน</h5>
               <p class="card-text">ให้คำปรึกษาตั้งแต่การเลือกซื้อจนถึงการโอนกรรมสิทธิ์</p>
             </div>
@@ -172,7 +181,7 @@ session_start();
         <div class="col-md-4">
           <div class="card h-100 text-center shadow-sm">
             <div class="card-body">
-              
+
               <h5 class="card-title">ปลอดภัย</h5>
               <p class="card-text">การทำธุรกรรมที่ปลอดภัยและโปร่งใสทุกขั้นตอน</p>
             </div>
@@ -245,13 +254,13 @@ session_start();
     });
   </script>
   <?php
-    // ตรวจสอบว่ามีข้อความแจ้งเตือนใน session หรือไม่
-    if (isset($_SESSION['alert_message']) && isset($_SESSION['alert_type'])) {
-        $alert_message = $_SESSION['alert_message'];
-        $alert_type = $_SESSION['alert_type'];
+  // ตรวจสอบว่ามีข้อความแจ้งเตือนใน session หรือไม่
+  if (isset($_SESSION['alert_message']) && isset($_SESSION['alert_type'])) {
+    $alert_message = $_SESSION['alert_message'];
+    $alert_type = $_SESSION['alert_type'];
 
-        // แสดงผล SweetAlert ด้วย JavaScript
-        echo "<script>
+    // แสดงผล SweetAlert ด้วย JavaScript
+    echo "<script>
             Swal.fire({
                 icon: '{$alert_type}',
                 title: 'แจ้งเตือน',
@@ -260,34 +269,44 @@ session_start();
             });
         </script>";
 
-        // ล้างค่า session หลังจากแสดงผลแล้ว เพื่อไม่ให้แสดงซ้ำ
-        unset($_SESSION['alert_message']);
-        unset($_SESSION['alert_type']);
-    }
+    // ล้างค่า session หลังจากแสดงผลแล้ว เพื่อไม่ให้แสดงซ้ำ
+    unset($_SESSION['alert_message']);
+    unset($_SESSION['alert_type']);
+  }
+  ?>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+        <?php
+        // ตรวจสอบก่อนว่ามี session การแจ้งเตือนอยู่หรือไม่
+        $alert_data = null;
+        if (isset($_SESSION['booking_status'])) {
+            $alert_data = $_SESSION['booking_status'];
+            unset($_SESSION['booking_status']); // ล้างค่าทิ้ง
+        } elseif (isset($_SESSION['purchase_status'])) {
+            $alert_data = $_SESSION['purchase_status'];
+            unset($_SESSION['purchase_status']); // ล้างค่าทิ้ง
+        }
+
+        // ถ้ามีข้อมูลการแจ้งเตือน, ให้สร้าง script สำหรับแสดงผล
+        if ($alert_data):
     ?>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // ใช้ PHP ตรวจสอบว่ามี session 'booking_status' อยู่หรือไม่
-        <?php if (isset($_SESSION['booking_status'])): ?>
-            
-            // นำข้อมูลจาก session มาเก็บในตัวแปร JavaScript
-            const bookingStatus = <?= json_encode($_SESSION['booking_status']) ?>;
+        // แปลงข้อมูลจาก PHP array เป็น JavaScript object
+        const alertData = <?= json_encode($alert_data) ?>;
 
-            // แสดง SweetAlert
-            Swal.fire({
-                icon: bookingStatus.status,  // 'success' หรือ 'error'
-                title: bookingStatus.title,
-                text: bookingStatus.message,
-                confirmButtonText: 'ตกลง'
-            });
-
-            // ล้างค่า session ทิ้งไป เพื่อไม่ให้แจ้งเตือนซ้ำเมื่อรีเฟรชหน้า
-            <?php unset($_SESSION['booking_status']); ?>
-
-        <?php endif; ?>
+        // แสดง SweetAlert
+        Swal.fire({
+            icon: alertData.status,
+            title: alertData.title,
+            // ใช้ html หรือ text ขึ้นอยู่กับข้อมูลที่ส่งมา
+            text: alertData.message || null,
+            html: alertData.html || null,
+            confirmButtonText: 'ตกลง'
+        });
+    <?php endif; ?>
     </script>
 </body>
+
 </html>
 </body>
 

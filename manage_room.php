@@ -100,7 +100,7 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
 <body>
     <div class="d-flex">
         <nav class="sidebar flex-shrink-0 p-3 text-white offcanvas-lg offcanvas-start" id="sidebarMenu">
-            <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
                 <span class="fs-4 fw-bold">Chonburi Condo</span>
             </a>
             <hr>
