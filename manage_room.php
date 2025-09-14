@@ -6,7 +6,21 @@ include 'ConnectDB.php';
 if (!isset($_SESSION['User_id']) || $_SESSION['Role'] !== 'Admin') {
     die("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ <a href='login.php'>เข้าสู่ระบบ</a>");
 }
+$stats_query = "
+    SELECT
+        (SELECT COUNT(*) FROM reserve) AS total_reservations,
+        SUM(CASE WHEN Status = 'reserve' THEN 1 ELSE 0 END) AS pending_rooms,
+        SUM(CASE WHEN Status = 'Sold' THEN Room_price ELSE 0 END) AS total_revenue,
+        COUNT(*) AS total_rooms,
+        SUM(CASE WHEN Status = 'Empty' THEN 1 ELSE 0 END) AS available_rooms
+    FROM
+        room_db;
+";
+$stats_result = $conn->query($stats_query);
+$stats = $stats_result->fetch_assoc();
+// --- สิ้นสุดส่วนที่เพิ่ม ---
 
+// ดึงข้อมูลสำหรับตาราง 
 $result = $conn->query("SELECT r.*, usr.Username AS seller_name 
                         FROM room_db r
                         LEFT JOIN users usr ON r.Seller_id = usr.User_id
@@ -133,7 +147,7 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                 </li>
             </ul>
             <hr>
-            <ul class="nav nav-pills flex-column">
+            <!-- <ul class="nav nav-pills flex-column">
                 <li>
                     <a href="#" class="nav-link text-white">
                         <i class="bi bi-send-fill"></i> ส่งคำสั่ง
@@ -144,7 +158,7 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                         <i class="bi bi-gear-fill"></i> ตั้งค่า
                     </a>
                 </li>
-            </ul>
+            </ul> -->
         </nav>
 
         <div class="main-content p-3 p-md-4">
@@ -180,8 +194,10 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                         <div class="card-body d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <p class="text-muted mb-1">การจองทั้งหมด</p>
-                                <h3 class="fw-bold mb-2">156</h3>
-                                <small class="text-success"><i class="bi bi-arrow-up"></i> +12% จากเดือนที่แล้ว</small>
+                                <h3 class="fw-bold mb-2">
+                                    <?= number_format($stats['total_reservations'] ?? 0) ?>
+                                </h3>
+                                <small class="text-muted">รายการ</small>
                             </div>
                             <div class="icon-circle bg-primary"><i class="bi bi-journal-check"></i></div>
                         </div>
@@ -192,7 +208,9 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                         <div class="card-body d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <p class="text-muted mb-1">รอยืนยัน</p>
-                                <h3 class="fw-bold mb-2">12</h3>
+                                <h3 class="fw-bold mb-2">
+                                    <?= number_format($stats['pending_rooms'] ?? 0) ?>
+                                </h3>
                                 <small class="text-warning">ต้องดำเนินการ</small>
                             </div>
                             <div class="icon-circle bg-warning"><i class="bi bi-clock-history"></i></div>
@@ -203,9 +221,11 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                     <div class="card stat-card h-100">
                         <div class="card-body d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <p class="text-muted mb-1">รายได้รวม</p>
-                                <h3 class="fw-bold mb-2">฿45,600,000</h3>
-                                <small class="text-success"><i class="bi bi-arrow-up"></i> +8% จากเดือนที่แล้ว</small>
+                                <p class="text-muted mb-1">รายได้รวม (ที่ขายแล้ว)</p>
+                                <h3 class="fw-bold mb-2">
+                                    ฿<?= number_format($stats['total_revenue'] ?? 0, 2) ?>
+                                </h3>
+                                <small class="text-success">ยอดขายทั้งหมด</small>
                             </div>
                             <div class="icon-circle bg-success"><i class="bi bi-cash-stack"></i></div>
                         </div>
@@ -216,8 +236,12 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                         <div class="card-body d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <p class="text-muted mb-1">คอนโดทั้งหมด</p>
-                                <h3 class="fw-bold mb-2">24</h3>
-                                <small class="text-muted">22 ใช้งานได้</small>
+                                <h3 class="fw-bold mb-2">
+                                    <?= number_format($stats['total_rooms'] ?? 0) ?>
+                                </h3>
+                                <small class="text-muted">
+                                    <?= number_format($stats['available_rooms'] ?? 0) ?> ใช้งานได้
+                                </small>
                             </div>
                             <div class="icon-circle" style="background-color: #6f42c1;"><i class="bi bi-buildings-fill"></i></div>
                         </div>
