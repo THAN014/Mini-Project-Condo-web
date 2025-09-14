@@ -235,7 +235,7 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>ชื่อห้อง</th>
+                                <th>ห้อง</th>
                                 <th>ราคา</th>
                                 <th>ขนาด</th>
                                 <th>ชั้น</th>

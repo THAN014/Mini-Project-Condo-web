@@ -104,7 +104,7 @@ if (!$room || $room['Status'] != 'Empty') {
                         </div>
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/400x240" alt="Room Image" class="img-fluid rounded" style="width: 150px; height: 90px; object-fit: cover;">
+                                <img src="img/Condo_img/<?= htmlspecialchars($room['Picture']) ?>" alt="Room Image" class="img-fluid rounded" style="width: 150px; height: 90px; object-fit: cover;">
                                 <div class="ms-3">
                                     <h6 class="mb-1"><?= htmlspecialchars($room['Room_number'] ?? 'ชื่อห้องตัวอย่าง'); ?></h6>
                                     <h5 class="text-primary fw-bold mb-1">฿<?= number_format($room['Room_price']); ?></h5>

@@ -18,17 +18,19 @@ $size = $_POST['Room_size'];
 $floor = $_POST['Room_floor'];
 $description = $_POST['description'];
 $seller_id = $_SESSION['User_id'];
+$Picture = $_FILES['Picture']['name']; //get file name , type name
 
 // เตรียมคำสั่ง SQL
-$stmt = $conn->prepare("INSERT INTO room_db (Room_number, Room_price, Room_size, Room_floor, description, Status, Seller_id) 
-                       VALUES (?, ?, ?, ?, ?, 'Empty', ?)");
-$stmt->bind_param("siiisi", $Room_number, $price, $size, $floor, $description, $seller_id);
+$stmt = $conn->prepare("INSERT INTO room_db (Room_number, Room_price, Room_size, Room_floor, description, Status, Seller_id, Picture) 
+                       VALUES (?, ?, ?, ?, ?, 'Empty', ? , ?)");
+$stmt->bind_param("siiisis", $Room_number, $price, $size, $floor, $description, $seller_id , $Picture);
 
 // ลอง Execute และตรวจสอบผลลัพธ์
 if ($stmt->execute()) {
     // ถ้าสำเร็จ: เก็บข้อความสำเร็จลง Session
     $_SESSION['alert_type'] = 'success';
     $_SESSION['alert_message'] = 'ลงประกาศขายห้องของคุณเรียบร้อยแล้ว!';
+    move_uploaded_file($_FILES['Picture']['tmp_name'],'img/Condo_img/'.$Picture); //move file to destinaged path
 } else {
     // ถ้าไม่สำเร็จ: เก็บข้อความข้อผิดพลาดลง Session
     $_SESSION['alert_type'] = 'error';

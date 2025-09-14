@@ -7,7 +7,7 @@ if (!isset($_SESSION['User_id']) || $_SESSION['Role'] !== 'Admin') {
     die("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ <a href='login.php'>เข้าสู่ระบบ</a>");
 }
 
-$Room_id = $_GET['Room_id'] ?? 0;
+$Room_id = $_GET['Room_id'];
 $stmt = $conn->prepare("SELECT * FROM room_db WHERE Room_id=?");
 $stmt->bind_param("i", $Room_id);
 $stmt->execute();
@@ -29,11 +29,11 @@ if (!$room_db) {
 <body>
     <h2>แก้ไขข้อมูลห้องคอนโด</h2>
 
-    <form method="post" action="edit_room_action.php">
+    <form method="post" action="edit_room_action.php" enctype="multipart/form-data">
         <input type="hidden" name="Room_id" value="<?= $room_db['Room_id']; ?>">
 
-        <label>ชื่อห้อง / โครงการ:
-            <input type="text" name="Room_number" value="<?= $room_db['Room_number']; ?>" required>
+        <label>ห้องเลขที่:
+            <input type="number" name="Room_number" value="<?= $room_db['Room_number']; ?>" required>
         </label><br><br>
 
         <label>ราคา (บาท):
@@ -59,6 +59,14 @@ if (!$room_db) {
                 <option value="Sold" <?= $room_db['Status'] == 'Sold' ? 'selected' : ''; ?>>ขายแล้ว</option>
             </select>
         </label><br><br>
+        <div class="mb-3">
+                                <label class="form-label">รูปภาพเดิม</label>
+                                <img src="img/Condo_img/<?= $room_db['Picture']; ?>" width="150">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Upload รูปภาพใหม่</label>
+                                <input type="file" name="Picture" class="form-control">
+                            </div>
 
         <button type="submit">บันทึกการแก้ไข</button>
     </form>

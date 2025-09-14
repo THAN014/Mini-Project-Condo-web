@@ -134,7 +134,7 @@ session_start();
                 <?php else: ?>
                   <span class="badge bg-secondary mb-2">ไม่ว่าง</span>
                 <?php endif; ?>
-                <h5 class="card-title"><?= htmlspecialchars($row['Room_number']); ?></h5>
+                <h5 class="card-title">ห้อง <?= htmlspecialchars($row['Room_number']); ?></h5>
                 <h6 class="card-subtitle mb-2 text-muted">฿<?= number_format($row['Room_price']); ?></h6>
                 <p class="card-text"><?= htmlspecialchars($row['Room_location'] ?? 'พัทยา'); ?></p>
                 <ul class="list-inline mb-2">
