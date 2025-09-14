@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="card p-4 p-md-5">
                 <form method="post" action="">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="firstName" class="form-label">Username *</label>
                             <input type="text" class="form-control" id="firstName" placeholder="กรอกชื่อของคุณ" name="Username" required>
                         </div>

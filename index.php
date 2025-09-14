@@ -12,6 +12,9 @@ session_start();
   <meta name="description" content="เลือกซื้อขายคอนโดคุณภาพในทำเลที่ดีที่สุดของจังหวัดชลบุรี" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="globals.css" />
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-light">
@@ -241,6 +244,51 @@ session_start();
       }
     });
   </script>
+  <?php
+    // ตรวจสอบว่ามีข้อความแจ้งเตือนใน session หรือไม่
+    if (isset($_SESSION['alert_message']) && isset($_SESSION['alert_type'])) {
+        $alert_message = $_SESSION['alert_message'];
+        $alert_type = $_SESSION['alert_type'];
+
+        // แสดงผล SweetAlert ด้วย JavaScript
+        echo "<script>
+            Swal.fire({
+                icon: '{$alert_type}',
+                title: 'แจ้งเตือน',
+                text: '{$alert_message}',
+                confirmButtonText: 'ตกลง'
+            });
+        </script>";
+
+        // ล้างค่า session หลังจากแสดงผลแล้ว เพื่อไม่ให้แสดงซ้ำ
+        unset($_SESSION['alert_message']);
+        unset($_SESSION['alert_type']);
+    }
+    ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ใช้ PHP ตรวจสอบว่ามี session 'booking_status' อยู่หรือไม่
+        <?php if (isset($_SESSION['booking_status'])): ?>
+            
+            // นำข้อมูลจาก session มาเก็บในตัวแปร JavaScript
+            const bookingStatus = <?= json_encode($_SESSION['booking_status']) ?>;
+
+            // แสดง SweetAlert
+            Swal.fire({
+                icon: bookingStatus.status,  // 'success' หรือ 'error'
+                title: bookingStatus.title,
+                text: bookingStatus.message,
+                confirmButtonText: 'ตกลง'
+            });
+
+            // ล้างค่า session ทิ้งไป เพื่อไม่ให้แจ้งเตือนซ้ำเมื่อรีเฟรชหน้า
+            <?php unset($_SESSION['booking_status']); ?>
+
+        <?php endif; ?>
+    </script>
+</body>
+</html>
 </body>
 
 </html>

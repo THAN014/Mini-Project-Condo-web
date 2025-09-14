@@ -151,7 +151,7 @@ if (!isset($_SESSION['User_id'])) {
                             <div class="file-upload-wrapper" onclick="document.getElementById('fileUpload').click();">
                                 <p class="mb-1">ลากและวางรูปภาพที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
                                 <small class="text-muted">รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB ต่อรูป</small>
-                                <input type="file" id="fileUpload" name="pictures[]" multiple accept="image/png, image/jpeg">
+                                <input type="file" id="fileUpload" name="Pictures[]" multiple accept="image/png, image/jpeg">
                             </div>
                         </div>
                         <h5 class="mb-3 fw-bold">ข้อมูลติดต่อ</h5>
