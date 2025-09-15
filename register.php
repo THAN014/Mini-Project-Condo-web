@@ -1,16 +1,26 @@
 <?php
 include 'ConnectDB.php';
+
+// สร้างตัวแปรสำหรับส่งค่าไปให้ JavaScript
+$registration_success = false;
+$error_message = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $Username = $_POST['Username'];
     $Password = $_POST['Password'];
     $Phone = $_POST['Phone'];
     $Email = $_POST['Email'];
+
+    // --- ใช้โค้ด SQL เดิมของคุณ ---
+    // หมายเหตุ: การนำตัวแปรมาต่อกับ string ใน SQL โดยตรงมีความเสี่ยงด้าน SQL Injection
     $sql = "INSERT INTO users (Username, Password , Phone , Email) VALUES ('$Username', '$Password' , '$Phone' , '$Email')";
+    
     if ($conn->query($sql)) {
-        header("Location: login.php");
-        exit;
+        // เปลี่ยนจากการ redirect มาเป็นการตั้งค่าตัวแปรแทน
+        $registration_success = true;
     } else {
-        $error = "เกิดข้อผิดพลาด: " . $conn->error;
+        // กำหนดข้อความ error
+        $error_message = "เกิดข้อผิดพลาด: " . $conn->error;
     }
 }
 ?>
@@ -23,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก - Chonburi Condo</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -89,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">ซื้อคอนโด</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">ขายคอนโด</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php">ซื้อคอนโด</a></li>
+                    <li class="nav-item"><a class="nav-link" href="Sell_room">ขายคอนโด</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">เกี่ยวกับเรา</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">ติดต่อ</a></li>
                 </ul>
@@ -134,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <span class="input-group-text bg-transparent"><i class="bi bi-eye"></i></span>
                             </div>
                         </div>
-                        <div class="col-12">
+                        <!-- <div class="col-12">
                             <label class="form-label">ความสนใจ (เลือกได้หลายข้อ)</label>
                             <div>
                                 <div class="form-check form-check-inline">
@@ -154,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <label class="form-check-label" for="interest4">ลงทุน</label>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-12">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="terms">
@@ -241,6 +252,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        <?php if ($registration_success) : ?>
+            // ถ้าการสมัครสำเร็จ
+            Swal.fire({
+                title: 'สมัครสมาชิกสำเร็จ!',
+                text: 'ระบบกำลังนำท่านไปยังหน้าเข้าสู่ระบบ',
+                icon: 'success',
+                timer: 2000, // แสดงผล 2 วินาที
+                showConfirmButton: false,
+                allowOutsideClick: false
+            }).then(() => {
+                // หลังจาก Alert ปิด (หรือครบ 2 วินาที) ให้ Redirect
+                window.location.href = 'login.php';
+            });
+        <?php elseif (!empty($error_message)) : ?>
+            // ถ้าเกิดข้อผิดพลาด
+            Swal.fire({
+                title: 'เกิดข้อผิดพลาด!',
+                // ใช้ addslashes เพื่อป้องกัน error จากเครื่องหมาย ' หรือ " ในข้อความ
+                text: '<?php echo addslashes($error_message); ?>',
+                icon: 'error',
+                confirmButtonText: 'ตกลง'
+            });
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>

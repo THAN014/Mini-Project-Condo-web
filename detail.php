@@ -114,7 +114,7 @@ if (!$room) {
       <div class="card mb-4">
         <div class="card-body">
           <h4 class="card-title mb-3">รายละเอียด</h4>
-          <p class="card-text"><?= nl2br(htmlspecialchars($room['Room_detail'] ?? 'ไม่มีรายละเอียดเพิ่มเติม')) ?></p>
+          <p class="card-text"><?= nl2br(htmlspecialchars($room['Description'] ?? 'ไม่มีรายละเอียดเพิ่มเติม')) ?></p>
           <h5 class="mt-4 mb-3">จุดเด่น</h5>
           <div class="row row-cols-2 row-cols-md-3 g-2">
             <div class="col"><span class="badge bg-info text-dark w-100 py-2">เฟอร์นิเจอร์ครบ</span></div>

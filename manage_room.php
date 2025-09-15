@@ -6,6 +6,16 @@ include 'ConnectDB.php';
 if (!isset($_SESSION['User_id']) || $_SESSION['Role'] !== 'Admin') {
     die("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ <a href='login.php'>เข้าสู่ระบบ</a>");
 }
+
+$admin_id = $_SESSION['User_id'];
+$admin_query = $conn->prepare("SELECT Admin_Picture FROM users WHERE User_id = ?");
+$admin_query->bind_param("i", $admin_id);
+$admin_query->execute();
+$admin_result = $admin_query->get_result()->fetch_assoc();
+
+
+$admin_query->close();
+// ✅ ดึงข้อมูลสรุปสำหรับ Stat Cards
 $stats_query = "
     SELECT
         (SELECT COUNT(*) FROM reserve) AS total_reservations,
@@ -16,15 +26,29 @@ $stats_query = "
     FROM
         room_db;
 ";
+
 $stats_result = $conn->query($stats_query);
 $stats = $stats_result->fetch_assoc();
-// --- สิ้นสุดส่วนที่เพิ่ม ---
 
 // ดึงข้อมูลสำหรับตาราง 
 $result = $conn->query("SELECT r.*, usr.Username AS seller_name 
                         FROM room_db r
                         LEFT JOIN users usr ON r.Seller_id = usr.User_id
                         ORDER BY r.Room_id DESC");
+
+// ✅ สร้าง Array สำหรับกำหนดสี Badge ของสถานะห้อง
+$status_classes = [
+    'Empty' => 'bg-success',
+    'Sold' => 'bg-danger',
+    'reserve' => 'bg-warning text-dark' // เพิ่มสถานะจอง
+];
+$status_names = [
+    'Empty' => 'ว่าง',
+    'Sold' => 'ขายแล้ว',
+    'reserve' => 'จองแล้ว'
+];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -36,10 +60,12 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: #8f8f8fff;
+            /* ✅ ปรับปรุง: เปลี่ยนสีพื้นหลังให้ดูสบายตา */
+            background-color: #f8f9fa; 
         }
 
         .sidebar {
@@ -49,15 +75,16 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
         }
 
         .sidebar .nav-link {
-            color: #909090ff;
+            color: #adb5bd;
             font-size: 1rem;
             padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease-in-out;
         }
 
         .sidebar .nav-link.active,
         .sidebar .nav-link:hover {
             background-color: #343a40;
-            color: #ecececff;
+            color: #fff;
         }
 
         .sidebar .nav-link .bi {
@@ -84,28 +111,11 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .05);
         }
 
-        @media (max-width: 991.98px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                z-index: 1045;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .sidebar.show {
-                transform: translateX(0);
-            }
+        /* ✅ ปรับปรุง: ทำให้ตารางดูดีขึ้น */
+        .table th {
+            font-weight: 500;
         }
-
-        .table-responsive {
-            margin-top: 2rem;
-        }
-
-        .table th,
-        .table td {
+        .table td, .table th {
             vertical-align: middle;
         }
     </style>
@@ -113,199 +123,154 @@ $result = $conn->query("SELECT r.*, usr.Username AS seller_name
 
 <body>
     <div class="d-flex">
-        <nav class="sidebar flex-shrink-0 p-3 text-white offcanvas-lg offcanvas-start" id="sidebarMenu">
+        <nav class="sidebar flex-shrink-0 p-3 text-white">
             <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                <i class="bi bi-building-fill-gear fs-2 me-2"></i>
                 <span class="fs-4 fw-bold">Chonburi Condo</span>
             </a>
             <hr>
-            <p class="text-primary small">เมนูหลัก</p>
+            <p class="text-secondary small">เมนูหลัก</p>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" aria-current="page">
-                        <i class="bi bi-grid-fill"></i> ภาพรวม
-                    </a>
+                <li class="nav-item mb-1">
+                    <a href="manage_room.php" class="nav-link active" aria-current="page"><i class="bi bi-grid-fill"></i> ภาพรวม / จัดการห้อง</a>
                 </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-building-fill"></i> การจอง
-                    </a>
+                <li class="nav-item mb-1">
+                    <a href="#" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
                 </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-house-door-fill"></i> คอนโด
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-people-fill"></i> ลูกค้า
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-file-earmark-bar-graph-fill"></i> รายงาน
-                    </a>
+                <li class="nav-item mb-1">
+                    <a href="manage_user.php" class="nav-link text-white"><i class="bi bi-people-fill"></i> จัดการผู้ใช้</a>
                 </li>
             </ul>
             <hr>
-            <!-- <ul class="nav nav-pills flex-column">
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-send-fill"></i> ส่งคำสั่ง
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
-                        <i class="bi bi-gear-fill"></i> ตั้งค่า
-                    </a>
-                </li>
-            </ul> -->
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="img/Admin_img/<?=($admin_result['Admin_Picture']) ?>" alt="" width="32" height="32" class="rounded-circle me-2">
+                    <strong><?= htmlspecialchars($_SESSION['Username']) ?></strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                    <li><a class="dropdown-item" href="#">ตั้งค่า</a></li>
+                    <li><a class="dropdown-item" href="#">โปรไฟล์</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
+                </ul>
+            </div>
         </nav>
 
         <div class="main-content p-3 p-md-4">
-            <header class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom text-white">
+            <header class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-light d-lg-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    <h2 class="h4 mb-0 fw-bold">ภาพรวม</h2>
+                    <h2 class="h4 mb-0 fw-bold">ภาพรวมระบบ</h2>
                 </div>
-                <div class="d-flex align-items-center">
-                    <form class="d-none d-md-flex me-3">
-                        <input class="form-control" type="search" placeholder="ค้นหา...">
-                    </form>
-                    <div class="position-relative me-3">
-                        <a href="#" class="text-primary"><i class="bi bi-bell-fill fs-5"></i></a>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em;">3</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Admin avatar">
-                        <div class="ms-2 d-none d-md-block">
-                            <span class="fw-bold">Admin</span>
-                        </div>
-                        <a href="logout.php" class="btn btn-outline-secondary btn-sm ms-3">ออกจากระบบ</a>
-                    </div>
-                </div>
+                <a href="logout.php" class="btn btn-outline-danger btn-sm">ออกจากระบบ</a>
             </header>
-
-            <!-- Stat Cards (can be dynamic later) -->
+            
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <p class="text-muted mb-1">การจองทั้งหมด</p>
-                                <h3 class="fw-bold mb-2">
-                                    <?= number_format($stats['total_reservations'] ?? 0) ?>
-                                </h3>
-                                <small class="text-muted">รายการ</small>
-                            </div>
-                            <div class="icon-circle bg-primary"><i class="bi bi-journal-check"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <p class="text-muted mb-1">รอยืนยัน</p>
-                                <h3 class="fw-bold mb-2">
-                                    <?= number_format($stats['pending_rooms'] ?? 0) ?>
-                                </h3>
-                                <small class="text-warning">ต้องดำเนินการ</small>
-                            </div>
-                            <div class="icon-circle bg-warning"><i class="bi bi-clock-history"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <p class="text-muted mb-1">รายได้รวม (ที่ขายแล้ว)</p>
-                                <h3 class="fw-bold mb-2">
-                                    ฿<?= number_format($stats['total_revenue'] ?? 0, 2) ?>
-                                </h3>
-                                <small class="text-success">ยอดขายทั้งหมด</small>
-                            </div>
-                            <div class="icon-circle bg-success"><i class="bi bi-cash-stack"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <p class="text-muted mb-1">คอนโดทั้งหมด</p>
-                                <h3 class="fw-bold mb-2">
-                                    <?= number_format($stats['total_rooms'] ?? 0) ?>
-                                </h3>
-                                <small class="text-muted">
-                                    <?= number_format($stats['available_rooms'] ?? 0) ?> ใช้งานได้
-                                </small>
-                            </div>
-                            <div class="icon-circle" style="background-color: #6f42c1;"><i class="bi bi-buildings-fill"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+               </div>
 
-            <!-- Room Management Table -->
-            <div class="card mb-4">
-                <div class="card-header bg-white border-0 py-3">
+            <div class="card">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 fw-bold">จัดการห้องคอนโด</h5>
+                    <a href="add_room.php" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle-fill me-1"></i> เพิ่มห้องใหม่
+                    </a>
                 </div>
-                <div class="card-body table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>ห้อง</th>
-                                <th>ราคา</th>
-                                <th>ขนาด</th>
-                                <th>ชั้น</th>
-                                <th>ผู้ขาย</th>
-                                <th>สถานะ</th>
-                                <th>การจัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($row = $result->fetch_assoc()): ?>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <td><?= $row['Room_id']; ?></td>
-                                    <td><?= htmlspecialchars($row['Room_number']); ?></td>
-                                    <td><?= number_format($row['Room_price']); ?> บาท</td>
-                                    <td><?= htmlspecialchars($row['Room_size']); ?> ตร.ม.</td>
-                                    <td><?= htmlspecialchars($row['Room_floor']); ?></td>
-                                    <td><?= $row['seller_name'] ?: 'ระบบ'; ?></td>
-                                    <td>
-                                        <?php
-                                        if ($row['Status'] == 'Empty') {
-                                            echo '<span class="badge bg-success">ว่าง</span>';
-                                        } elseif ($row['Status'] == 'Sold') {
-                                            echo '<span class="badge bg-danger">ขายแล้ว</span>';
-                                        } else {
-                                            echo '<span class="badge bg-secondary">ไม่ว่าง</span>';
-                                        }
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <a href="edit_room.php?Room_id=<?= $row['Room_id']; ?>">✏️ แก้ไข</a> |
-                                        <a href="delete_room.php?Room_id=<?= $row['Room_id']; ?>" onclick="return confirm('ยืนยันลบห้องนี้?');">🗑️ ลบ</a>
-                                    </td>
-
+                                    <th>ID</th>
+                                    <th>ห้อง</th>
+                                    <th>ราคา</th>
+                                    <th>ขนาด (ตร.ม.)</th>
+                                    <th>ชั้น</th>
+                                    <th>ผู้ขาย</th>
+                                    <th class="text-center">สถานะ</th>
+                                    <th class="text-center">การจัดการ</th>
                                 </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php if ($result->num_rows > 0): ?>
+                                    <?php while ($row = $result->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?= $row['Room_id']; ?></td>
+                                            <td class="fw-bold"><?= htmlspecialchars($row['Room_number']); ?></td>
+                                            <td><?= number_format($row['Room_price']); ?></td>
+                                            <td><?= htmlspecialchars($row['Room_size']); ?></td>
+                                            <td><?= htmlspecialchars($row['Room_floor']); ?></td>
+                                            <td><?= $row['seller_name'] ?: '<span class="text-muted">ระบบ</span>'; ?></td>
+                                            <td class="text-center">
+                                                <?php
+                                                    $status = $row['Status'];
+                                                    $class = $status_classes[$status] ?? 'bg-secondary';
+                                                    $name = $status_names[$status] ?? 'ไม่ระบุ';
+                                                    echo "<span class=\"badge $class\">$name</span>";
+                                                ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="edit_room.php?Room_id=<?= $row['Room_id']; ?>" class="btn btn-warning btn-sm" title="แก้ไข">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <a href="delete_room.php?Room_id=<?= $row['Room_id']; ?>" class="btn btn-danger btn-sm btn-delete" data-room-id="<?= $row['Room_id'] ?>" title="ลบ">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">ยังไม่มีข้อมูลห้องในระบบ</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-
-            <div class="text-end mb-4">
-                <a href="index.php" class="btn btn-outline-secondary">← กลับไปหน้าหลัก</a>
             </div>
         </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
+    <script>
+        // 1. Script สำหรับแจ้งเตือนเมื่อมี status alert จาก session (เช่น หลังแก้ไข/เพิ่มข้อมูล)
+        <?php if (isset($_SESSION['status_alert'])): ?>
+            Swal.fire({
+                icon: '<?= $_SESSION['status_alert']['status'] ?>',
+                title: '<?= $_SESSION['status_alert']['title'] ?>',
+                text: '<?= $_SESSION['status_alert']['message'] ?>',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            <?php unset($_SESSION['status_alert']); ?>
+        <?php endif; ?>
+
+        // 2. Script สำหรับยืนยันการลบ
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault(); // หยุดการทำงานของลิงก์ปกติ
+                
+                const roomId = this.getAttribute('data-room-id');
+                const deleteUrl = this.href;
+
+                Swal.fire({
+                    title: 'คุณแน่ใจหรือไม่?',
+                    text: `คุณต้องการลบห้อง ID: ${roomId} ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'ใช่, ลบเลย!',
+                    cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ถ้าผู้ใช้กดยืนยัน ให้ไปที่ลิงก์สำหรับลบ
+                        window.location.href = deleteUrl;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
 </html>
