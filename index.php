@@ -8,6 +8,7 @@ session_start();
 <html lang="th">
 
 <head>
+  <link rel="shortcut icon" href="img/condo.png" type="image/x-icon">
   <meta charset="UTF-8">
   <title>Chonburi Condo - ค้นหาคอนโดในชลบุรี</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,7 @@ session_start();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="globals.css" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
