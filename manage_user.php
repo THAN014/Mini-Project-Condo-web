@@ -7,6 +7,14 @@ if (!isset($_SESSION['User_id']) || $_SESSION['Role'] !== 'Admin') {
     die("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ <a href='login.php'>เข้าสู่ระบบ</a>");
 }
 
+$admin_id = $_SESSION['User_id'];
+$admin_query = $conn->prepare("SELECT Admin_Picture FROM users WHERE User_id = ?");
+$admin_query->bind_param("i", $admin_id);
+$admin_query->execute();
+$admin_result = $admin_query->get_result()->fetch_assoc();
+
+$admin_query->close();
+
 // ✅ ดึงข้อมูลผู้ใช้ทั้งหมดจากฐานข้อมูล
 $result = $conn->query("SELECT User_id, Username,  Email, Phone, Role FROM users ORDER BY User_id DESC");
 
@@ -53,9 +61,9 @@ $role_classes = [
                 <li class="nav-item mb-1">
                     <a href="manage_room.php" class="nav-link text-white"><i class="bi bi-grid-fill"></i> ภาพรวม / จัดการห้อง</a>
                 </li>
-                <li class="nav-item mb-1">
+                <!-- <li class="nav-item mb-1">
                     <a href="#" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
-                </li>
+                </li> -->
                 <li class="nav-item mb-1">
                      <a href="manage_users.php" class="nav-link active" aria-current="page"><i class="bi bi-people-fill"></i> จัดการผู้ใช้</a>
                 </li>
@@ -63,7 +71,7 @@ $role_classes = [
             <hr>
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://via.placeholder.com/40" alt="" width="32" height="32" class="rounded-circle me-2">
+                    <img  src="img/Admin_img/<?=($admin_result['Admin_Picture']) ?>" alt="" width="32" height="32" class="rounded-circle me-2">
                     <strong><?= htmlspecialchars($_SESSION['Username']) ?></strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
