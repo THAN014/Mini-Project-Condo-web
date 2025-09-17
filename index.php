@@ -32,8 +32,8 @@ session_start();
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="#buy">ซื้อคอนโด</a></li>
           <li class="nav-item"><a class="nav-link" href="Sell_room.php">ขายคอนโด</a></li>
-          <li class="nav-item"><a class="nav-link" href="#about">เกี่ยวกับเรา</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">ติดต่อ</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="#about">เกี่ยวกับเรา</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">ติดต่อ</a></li> -->
         </ul>
         <div class="d-flex align-items-center">
           <?php if (isset($_SESSION['User_id'])):
@@ -60,7 +60,7 @@ session_start();
 
   <!-- Hero Section -->
 
-  <section class="py-5 text-center bg-white">
+  <!-- <section class="py-5 text-center bg-white">
     <div class="container">
       <h2 class="display-5 fw-bold mb-3">ค้นหาคอนโดในชลบุรี</h2>
       <p class="lead mb-4">เลือกซื้อขายคอนโดคุณภาพในทำเลที่ดีที่สุดของจังหวัดชลบุรี</p>
@@ -93,7 +93,7 @@ session_start();
         </div>
       </form>
     </div>
-  </section>
+  </section> -->
 
   <!-- Featured Condos Section -->
   <section class="py-5 bg-white">

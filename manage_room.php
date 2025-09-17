@@ -66,7 +66,7 @@ $status_names = [
         body {
             font-family: 'Sarabun', sans-serif;
             /* ✅ ปรับปรุง: เปลี่ยนสีพื้นหลังให้ดูสบายตา */
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
 
         .sidebar {
@@ -116,7 +116,9 @@ $status_names = [
         .table th {
             font-weight: 500;
         }
-        .table td, .table th {
+
+        .table td,
+        .table th {
             vertical-align: middle;
         }
     </style>
@@ -136,7 +138,7 @@ $status_names = [
                     <a href="manage_room.php" class="nav-link active" aria-current="page"><i class="bi bi-grid-fill"></i> ภาพรวม / จัดการห้อง</a>
                 </li>
                 <!-- <li class="nav-item mb-1">
-                    <a href="#" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
+                    <a href="reserve_detail.php" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
                 </li> -->
                 <li class="nav-item mb-1">
                     <a href="manage_user.php" class="nav-link text-white"><i class="bi bi-people-fill"></i> จัดการผู้ใช้</a>
@@ -145,13 +147,15 @@ $status_names = [
             <hr>
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="img/Admin_img/<?=($admin_result['Admin_Picture']) ?>" alt="" width="32" height="32" class="rounded-circle me-2">
+                    <img src="img/Admin_img/<?= ($admin_result['Admin_Picture']) ?>" alt="" width="32" height="32" class="rounded-circle me-2">
                     <strong><?= htmlspecialchars($_SESSION['Username']) ?></strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
                     <li><a class="dropdown-item" href="#">ตั้งค่า</a></li>
                     <li><a class="dropdown-item" href="#">โปรไฟล์</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
                 </ul>
             </div>
@@ -164,9 +168,9 @@ $status_names = [
                 </div>
                 <a href="logout.php" class="btn btn-outline-danger btn-sm">ออกจากระบบ</a>
             </header>
-            
+
             <div class="row g-4 mb-4">
-               </div>
+            </div>
 
             <div class="card">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
@@ -202,10 +206,10 @@ $status_names = [
                                             <td><?= $row['seller_name'] ?: '<span class="text-muted">ระบบ</span>'; ?></td>
                                             <td class="text-center">
                                                 <?php
-                                                    $status = $row['Status'];
-                                                    $class = $status_classes[$status] ?? 'bg-secondary';
-                                                    $name = $status_names[$status] ?? 'ไม่ระบุ';
-                                                    echo "<span class=\"badge $class\">$name</span>";
+                                                $status = $row['Status'];
+                                                $class = $status_classes[$status] ?? 'bg-secondary';
+                                                $name = $status_names[$status] ?? 'ไม่ระบุ';
+                                                echo "<span class=\"badge $class\">$name</span>";
                                                 ?>
                                             </td>
                                             <td class="text-center">
@@ -215,7 +219,13 @@ $status_names = [
                                                 <a href="delete_room.php?Room_id=<?= $row['Room_id']; ?>" class="btn btn-danger btn-sm btn-delete" data-room-id="<?= $row['Room_id'] ?>" title="ลบ">
                                                     <i class="bi bi-trash3-fill"></i>
                                                 </a>
+                                                <?php if ($row['Status'] === 'reserve'): ?>
+                                                    | <a href="reserve_detail.php?Room_id=<?= $row['Room_id']; ?>">👤 ดูผู้จอง</a>
+                                                <?php elseif ($row['Status'] === 'Sold'): ?>
+                                                    | <a href="purchase_detail.php?Room_id=<?= $row['Room_id']; ?>">💰 ดูผู้ซื้อ</a>
+                                                <?php endif; ?>
                                             </td>
+
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
@@ -230,7 +240,7 @@ $status_names = [
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -251,7 +261,7 @@ $status_names = [
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(event) {
                 event.preventDefault(); // หยุดการทำงานของลิงก์ปกติ
-                
+
                 const roomId = this.getAttribute('data-room-id');
                 const deleteUrl = this.href;
 
@@ -274,4 +284,5 @@ $status_names = [
         });
     </script>
 </body>
+
 </html>

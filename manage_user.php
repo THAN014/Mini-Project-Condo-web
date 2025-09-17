@@ -63,7 +63,7 @@ $role_classes = [
                     <a href="manage_room.php" class="nav-link text-white"><i class="bi bi-grid-fill"></i> ภาพรวม / จัดการห้อง</a>
                 </li>
                 <!-- <li class="nav-item mb-1">
-                    <a href="#" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
+                    <a href="reserve_detail.php" class="nav-link text-white"><i class="bi bi-journal-text"></i> การจอง</a>
                 </li> -->
                 <li class="nav-item mb-1">
                      <a href="manage_users.php" class="nav-link active" aria-current="page"><i class="bi bi-people-fill"></i> จัดการผู้ใช้</a>

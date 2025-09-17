@@ -68,8 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <ul class="navbar-nav">
         <li class="nav-item"><a class="nav-link" href="index.php">ซื้อคอนโด</a></li>
         <li class="nav-item"><a class="nav-link" href="Sell_room.php">ขายคอนโด</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">เกี่ยวกับเรา</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">ติดต่อ</a></li>
+<!--         <li class="nav-item"><a class="nav-link" href="#">เกี่ยวกับเรา</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">ติดต่อ</a></li> -->
       </ul>
     </div>
   </div>
