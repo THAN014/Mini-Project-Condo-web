@@ -119,12 +119,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
       <button type="submit" class="btn btn-dark w-100">เข้าสู่ระบบ</button>
 
-      <div class="text-center my-3">หรือ</div>
+      <!-- <div class="text-center my-3">หรือ</div>
 
       <div class="d-flex gap-2">
         <a href="#" class="btn btn-outline-secondary w-50">Google</a>
         <a href="#" class="btn btn-outline-secondary w-50">Facebook</a>
-      </div>
+      </div> -->
     </form>
 
     <div class="text-center mt-3">
